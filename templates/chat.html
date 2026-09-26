@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FRED Chart Agent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #1f2937;
+        }
+        h1 {
+            font-size: 1.4rem;
+        }
+        #chat-log {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            height: 560px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            background: #fafafa;
+        }
+        .msg {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            line-height: 1.4;
+        }
+        .msg.user {
+            background: #dbeafe;
+            text-align: right;
+            white-space: pre-wrap;
+        }
+        .msg.assistant {
+            background: #f3f4f6;
+        }
+        .msg .role {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+        .msg.assistant h1, .msg.assistant h2, .msg.assistant h3 {
+            margin: 0.6em 0 0.3em;
+            line-height: 1.3;
+        }
+        .msg.assistant h1:first-child, .msg.assistant h2:first-child, .msg.assistant h3:first-child {
+            margin-top: 0;
+        }
+        .msg.assistant p {
+            margin: 0.5em 0;
+        }
+        .msg.assistant ul, .msg.assistant ol {
+            margin: 0.4em 0;
+            padding-left: 1.4em;
+        }
+        .msg.assistant li {
+            margin: 0.2em 0;
+        }
+        .msg.assistant hr {
+            border: none;
+            border-top: 1px solid #d1d5db;
+            margin: 0.8em 0;
+        }
+        .msg.assistant table {
+            border-collapse: collapse;
+            margin: 0.6em 0;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        .msg.assistant th, .msg.assistant td {
+            border: 1px solid #d1d5db;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        .msg.assistant th {
+            background: #e5e7eb;
+        }
+        .msg.assistant code {
+            background: #e5e7eb;
+            border-radius: 3px;
+            padding: 1px 4px;
+            font-size: 0.9em;
+        }
+        .msg.assistant blockquote {
+            border-left: 3px solid #9ca3af;
+            margin: 0.5em 0;
+            padding: 0.2em 0.8em;
+            color: #4b5563;
+        }
+        .chart img {
+            max-width: 100%;
+            border-radius: 6px;
+            margin-top: 8px;
+            display: block;
+        }
+        form {
+            display: flex;
+            gap: 8px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+        .error {
+            color: #b91c1c;
+            margin-bottom: 12px;
+        }
+        .reset-form {
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>FRED Chart Agent</h1>
+
+    <div id="chat-log">
+        {% for turn in history %}
+        <div class="msg {{ turn.role }}">
+            <span class="role">{{ "You" if turn.role == "user" else "Analyst" }}</span>
+            {% if turn.role == "assistant" %}
+            {{ turn.html | safe }}
+            {% for img in turn.images | default([]) %}
+            <div class="chart"><img src="data:image/png;base64,{{ img }}" alt="Generated chart"></div>
+            {% endfor %}
+            {% else %}
+            {{ turn.content }}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="chat">
+        <input type="text" name="message" placeholder="Ask about FRED economic/market data..." required autofocus>
+        <button type="submit">Send</button>
+    </form>
+
+    <form class="reset-form" method="post" action="reset">
+        <button type="submit">Clear chat</button>
+    </form>
+</body>
+</html>

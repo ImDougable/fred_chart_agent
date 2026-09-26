@@ -1,0 +1,8 @@
+claude-agent-sdk
+fastapi
+uvicorn[standard]
+jinja2
+python-multipart
+markdown
+matplotlib
+pandas
